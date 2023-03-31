@@ -1,0 +1,20 @@
+version: "3.8"
+
+services:
+  mysql:
+    image: mysql
+    container_name: mysql
+    restart: always
+    tty: true
+    environment:
+      MYSQL_ROOT_PASSWORD: book_pass
+      MYSQL_DATABASE: book_db
+      MYSQL_USER: book_user
+      MYSQL_PASSWORD: book_pass
+    volumes:
+      - book_db_data:/var/lib/mysql
+    ports:
+      - "4306:3306"
+
+volumes:
+  book_db_data:

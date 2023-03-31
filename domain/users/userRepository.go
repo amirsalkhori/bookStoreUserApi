@@ -1,6 +1,7 @@
 package users
 
 import (
+	usersDB "bookStoreUser/dataSorces/mysql/usersDB"
 	"bookStoreUser/errors"
 	dateutils "bookStoreUser/utils/dateUtils"
 	"fmt"
@@ -11,6 +12,9 @@ var (
 )
 
 func (user *User) Get() *errors.RestError {
+	if err := usersDB.Client.Ping(); err != nil {
+		panic(err)
+	}
 	result := userDb[user.Id]
 	if result == nil {
 		return errors.NewNotFoundError(fmt.Sprintf("User %d not fount", user.Id))
