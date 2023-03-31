@@ -3,8 +3,9 @@ package users
 import (
 	usersDB "bookStoreUser/dataSorces/mysql/usersDB"
 	"bookStoreUser/errors"
-	dateutils "bookStoreUser/utils/dateUtils"
+	"bookStoreUser/utils/dateUtils"
 	"fmt"
+	"strings"
 )
 
 var (
@@ -29,15 +30,27 @@ func (user *User) Get() *errors.RestError {
 }
 
 func (user *User) Save() *errors.RestError {
-	currentUser := userDb[user.Id]
-	if currentUser != nil {
-		if currentUser.Email == user.Email {
-			return errors.NewBadRequestError(fmt.Sprintf("Email %s is already exists!", user.Email))
-		}
-		return errors.NewBadRequestError(fmt.Sprintf("Id %d is already exists!", user.Id))
+	query := "INSERT INTO users (name, family,email, created_at) VALUES (?, ?, ?, ?);"
+	statement, err := usersDB.Client.Prepare(query)
+	if err != nil {
+		return errors.NewInternamlServerError(err.Error())
 	}
-	userDb[user.Id] = user
-	user.CreatedAt = dateutils.GetNowString()
+	defer statement.Close()
+	user.CreatedAt = dateUtils.GetNowString()
+
+	fmt.Println("", user.CreatedAt)
+	insertResult, err := statement.Exec(user.Name, user.Family, user.Email, user.CreatedAt)
+	if err != nil {
+		if strings.Contains(err.Error(), "email_UNIQUE") {
+			return errors.NewBadRequestError(fmt.Sprintf("Email %s already exsist!", user.Email))
+		}
+		return errors.NewInternamlServerError("Error durring the insert user")
+	}
+	userId, err := insertResult.LastInsertId()
+	if err != nil {
+		return errors.NewInternamlServerError("Error durring save user")
+	}
+	user.Id = userId
 
 	return nil
 }
