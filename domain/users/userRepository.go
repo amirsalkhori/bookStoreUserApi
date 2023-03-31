@@ -8,23 +8,24 @@ import (
 	"strings"
 )
 
-var (
-	userDb = make(map[int64]*User)
-)
 
 func (user *User) Get() *errors.RestError {
 	if err := usersDB.Client.Ping(); err != nil {
 		panic(err)
 	}
-	result := userDb[user.Id]
-	if result == nil {
-		return errors.NewNotFoundError(fmt.Sprintf("User %d not fount", user.Id))
+	query := "SELECT * FROM users where id = ?"
+	statement, err := usersDB.Client.Prepare(query)
+	if err != nil {
+		return errors.NewInternamlServerError(err.Error())
 	}
-	user.Id = result.Id
-	user.Name = result.Name
-	user.Family = result.Family
-	user.Email = result.Email
-	user.CreatedAt = result.CreatedAt
+	defer statement.Close()
+	result := statement.QueryRow(user.Id)
+	if err := result.Scan(&user.Id, &user.Name, &user.Family, &user.Email, &user.CreatedAt); err != nil {
+		if strings.Contains(err.Error(), "no rows in result set") {
+			return errors.NewNotFoundError(fmt.Sprintf("user %d not found", user.Id))
+		}
+		return errors.NewInternamlServerError(fmt.Sprintf("Error when trying get user %d: %s", user.Id, err.Error()))
+	}
 
 	return nil
 }

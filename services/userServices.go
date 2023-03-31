@@ -16,10 +16,10 @@ func CreateUser(user users.User) (*users.User, *errors.RestError) {
 }
 
 func GetUser(userId int64) (*users.User, *errors.RestError) {
-	result := users.User{Id: userId}
+	result := &users.User{Id: userId}
 	if err := result.Get(); err != nil {
 		return nil, err
 	}
 
-	return &result, nil
+	return result, nil
 }
