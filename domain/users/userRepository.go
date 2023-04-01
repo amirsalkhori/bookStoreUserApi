@@ -38,8 +38,7 @@ func (user *User) Save() *errors.RestError {
 	}
 	defer statement.Close()
 	user.CreatedAt = dateUtils.GetNowString()
-
-	fmt.Println("", user.CreatedAt)
+	
 	insertResult, err := statement.Exec(user.Name, user.Family, user.Email, user.CreatedAt)
 	if err != nil {
 		if strings.Contains(err.Error(), "email_UNIQUE") {
@@ -53,5 +52,25 @@ func (user *User) Save() *errors.RestError {
 	}
 	user.Id = userId
 
+	return nil
+}
+
+func (user *User) Update() *errors.RestError {
+	query := "UPDATE users SET name = ?, family = ?,email = ? where id = ?;"
+	statement, err := usersDB.Client.Prepare(query)
+	if err != nil {
+		return errors.NewInternamlServerError(err.Error())
+	}
+	defer statement.Close()
+	
+	res, err := statement.Exec(user.Name, user.Family, user.Email, user.Id)
+	fmt.Println(res)
+	if err != nil {
+		if strings.Contains(err.Error(), "email_UNIQUE") {
+			return errors.NewBadRequestError(fmt.Sprintf("Email %s already exsist!", user.Email))
+		}
+		return errors.NewInternamlServerError("Error durring the update user")
+	}
+	
 	return nil
 }
