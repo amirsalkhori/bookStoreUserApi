@@ -39,6 +39,7 @@ func GetUser(c *gin.Context) {
 	if userErr != nil {
 		err := errors.NewBadRequestError("id should be a number !")
 		c.JSON(int(err.Status), err)
+		return
 	}
 
 	result, errResult := services.GetUser(userId)
@@ -54,6 +55,7 @@ func PutUser(c *gin.Context) {
 	if userErr != nil {
 		err := errors.NewBadRequestError("id should be a number !")
 		c.JSON(int(err.Status), err)
+		return
 	}
 	var user users.User
 	if err := c.ShouldBindJSON(&user); err != nil {
@@ -61,11 +63,37 @@ func PutUser(c *gin.Context) {
 		c.JSON(int(restError.Status), restError)
 		return
 	}
-	
+
 	user.Id = userId
 	result, err := services.UpdateUser(user)
 	if err != nil {
 		c.JSON(int(err.Status), err)
+		return
 	}
 	c.JSON(http.StatusOK, result)
+}
+
+func DeleteUser(c *gin.Context) {
+	userId, userErr := strconv.ParseInt(c.Param("id"), 10, 64)
+	if userErr != nil {
+		err := errors.NewBadRequestError("User id must be number")
+		c.JSON(int(err.Status), err)
+		return
+	}
+	var user users.User
+	user.Id = userId
+	if err := services.DeleteUser(user); err != nil{
+		c.JSON(int(err.Status), err)
+		return
+	}
+	c.JSON(http.StatusOK, map[string]string{"status":"deleted"})
+}
+
+func GetUsers(c *gin.Context) {
+	result, errResult := services.GetUserCollection()
+	if errResult != nil {
+		c.JSON(int(errResult.Status), errResult)
+		return
+	}
+	c.JSON(http.StatusAccepted, result)
 }

@@ -45,3 +45,26 @@ func UpdateUser(user users.User) (*users.User, *errors.RestError) {
 	}
 	return currentUser, nil
 }
+
+func DeleteUser(user users.User) *errors.RestError {
+	currentUser, errResult := GetUser(user.Id)
+	if errResult != nil {
+		return errResult
+	}
+
+	if err := currentUser.Delete(); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func GetUserCollection() ([]users.User, *errors.RestError) {
+	result := users.User{}
+	users, err := result.GetCollection()
+	if err != nil {
+		return nil, err
+	}
+
+	return users, nil
+}
