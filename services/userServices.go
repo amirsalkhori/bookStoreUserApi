@@ -68,3 +68,13 @@ func GetUserCollection() ([]users.User, *errors.RestError) {
 
 	return users, nil
 }
+
+func GetUserByStatus(status bool) ([]users.User, *errors.RestError){
+	users := &users.User{}
+	result, err := users.FibdByStatus(status)
+	if err != nil {
+		return nil, err
+	}
+
+	return result, nil
+}

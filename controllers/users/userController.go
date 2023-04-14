@@ -82,15 +82,34 @@ func DeleteUser(c *gin.Context) {
 	}
 	var user users.User
 	user.Id = userId
-	if err := services.DeleteUser(user); err != nil{
+	if err := services.DeleteUser(user); err != nil {
 		c.JSON(int(err.Status), err)
 		return
 	}
-	c.JSON(http.StatusOK, map[string]string{"status":"deleted"})
+	c.JSON(http.StatusOK, map[string]string{"status": "deleted"})
 }
 
 func GetUsers(c *gin.Context) {
 	result, errResult := services.GetUserCollection()
+	if errResult != nil {
+		c.JSON(int(errResult.Status), errResult)
+		return
+	}
+	c.JSON(http.StatusAccepted, result)
+}
+
+func Search(c *gin.Context) {
+	query := c.Query("status")
+	if query == "" {
+		c.JSON(200, "Not found any users")
+		return
+	}
+	status, err := strconv.ParseBool(query)
+	if err != nil {
+		c.JSON(400, err)
+		return
+	}
+	result, errResult := services.GetUserByStatus(status)
 	if errResult != nil {
 		c.JSON(int(errResult.Status), errResult)
 		return
