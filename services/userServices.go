@@ -3,12 +3,16 @@ package services
 import (
 	"bookStoreUser/domain/users"
 	"bookStoreUser/errors"
+	"bookStoreUser/utils/cryptoUtils"
+
+	"github.com/gin-gonic/gin"
 )
 
 func CreateUser(user users.User) (*users.User, *errors.RestError) {
 	if err := user.Validate(); err != nil {
 		return nil, err
 	}
+	user.Password = cryptoUtils.GetMd5(user.Password)
 	if err := user.Save(); err != nil {
 		return nil, err
 	}
@@ -59,7 +63,7 @@ func DeleteUser(user users.User) *errors.RestError {
 	return nil
 }
 
-func GetUserCollection() ([]users.User, *errors.RestError) {
+func GetUserCollection(c *gin.Context) ([]users.User, *errors.RestError) {
 	result := users.User{}
 	users, err := result.GetCollection()
 	if err != nil {
@@ -69,7 +73,7 @@ func GetUserCollection() ([]users.User, *errors.RestError) {
 	return users, nil
 }
 
-func GetUserByStatus(status bool) ([]users.User, *errors.RestError){
+func GetUserByStatus(status bool) ([]users.User, *errors.RestError) {
 	users := &users.User{}
 	result, err := users.FibdByStatus(status)
 	if err != nil {

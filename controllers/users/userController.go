@@ -90,7 +90,7 @@ func DeleteUser(c *gin.Context) {
 }
 
 func GetUsers(c *gin.Context) {
-	result, errResult := services.GetUserCollection()
+	result, errResult := services.GetUserCollection(c)
 	if errResult != nil {
 		c.JSON(int(errResult.Status), errResult)
 		return
