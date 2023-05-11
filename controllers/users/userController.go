@@ -31,7 +31,9 @@ func CreateUser(c *gin.Context) {
 		c.JSON(int(errResult.Status), errResult)
 		return
 	}
-	c.JSON(http.StatusCreated, result)
+
+	header := c.GetHeader("X-Public") == "true"
+	c.JSON(http.StatusCreated, result.Marshall(header))
 }
 
 func GetUser(c *gin.Context) {
@@ -47,7 +49,8 @@ func GetUser(c *gin.Context) {
 		c.JSON(int(errResult.Status), errResult)
 		return
 	}
-	c.JSON(http.StatusAccepted, result)
+	header := c.GetHeader("X-Public") == "true"
+	c.JSON(http.StatusAccepted, result.Marshall(header))
 }
 
 func PutUser(c *gin.Context) {
@@ -70,7 +73,8 @@ func PutUser(c *gin.Context) {
 		c.JSON(int(err.Status), err)
 		return
 	}
-	c.JSON(http.StatusOK, result)
+	header := c.GetHeader("X-Public") == "true"
+	c.JSON(http.StatusOK, result.Marshall(header))
 }
 
 func DeleteUser(c *gin.Context) {
@@ -90,12 +94,14 @@ func DeleteUser(c *gin.Context) {
 }
 
 func GetUsers(c *gin.Context) {
-	result, errResult := services.GetUserCollection(c)
+	users, errResult := services.GetUserCollection(c)
 	if errResult != nil {
 		c.JSON(int(errResult.Status), errResult)
 		return
 	}
-	c.JSON(http.StatusAccepted, result)
+	// c.JSON(http.StatusAccepted, result)
+	header := c.GetHeader("X-Public") == "true"
+	c.JSON(http.StatusOK, users.Marshall(header))
 }
 
 func Search(c *gin.Context) {
@@ -109,10 +115,11 @@ func Search(c *gin.Context) {
 		c.JSON(400, err)
 		return
 	}
-	result, errResult := services.GetUserByStatus(status)
+	users, errResult := services.GetUserByStatus(status)
 	if errResult != nil {
 		c.JSON(int(errResult.Status), errResult)
 		return
 	}
-	c.JSON(http.StatusAccepted, result)
+	header := c.GetHeader("X-Public") == "true"
+	c.JSON(http.StatusAccepted, users.Marshall(header))
 }

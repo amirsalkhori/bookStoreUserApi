@@ -63,7 +63,7 @@ func DeleteUser(user users.User) *errors.RestError {
 	return nil
 }
 
-func GetUserCollection(c *gin.Context) ([]users.User, *errors.RestError) {
+func GetUserCollection(c *gin.Context) (users.Users, *errors.RestError) {
 	result := users.User{}
 	users, err := result.GetCollection()
 	if err != nil {
@@ -73,7 +73,7 @@ func GetUserCollection(c *gin.Context) ([]users.User, *errors.RestError) {
 	return users, nil
 }
 
-func GetUserByStatus(status bool) ([]users.User, *errors.RestError) {
+func GetUserByStatus(status bool) (users.Users, *errors.RestError) {
 	users := &users.User{}
 	result, err := users.FibdByStatus(status)
 	if err != nil {

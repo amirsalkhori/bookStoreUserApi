@@ -26,6 +26,15 @@ func (user *User) Get() *errors.RestError {
 	// 	return errors.NewInternamlServerError(fmt.Sprintf("Error when trying get user %d: %s", user.Id, err.Error()))
 	// }
 
+	db, err := usersDB.Connect()
+	if err != nil {
+		return errors.NewInternamlServerError(err.Error())
+	}
+	err = db.Where("id = ?", user.Id).Find(&user).Error
+	if err != nil {
+		return errors.NewInternamlServerError(err.Error())
+	}
+
 	return nil
 }
 
