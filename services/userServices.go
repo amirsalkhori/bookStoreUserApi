@@ -8,7 +8,24 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func CreateUser(user users.User) (*users.User, *errors.RestError) {
+var(
+	UserService userServiceInterface = &userService{}
+)
+
+type userService struct{
+
+}
+
+type userServiceInterface interface{
+	CreateUser(users.User) (*users.User, *errors.RestError)
+	GetUser(int64) (*users.User, *errors.RestError)
+	UpdateUser(users.User) (*users.User, *errors.RestError)
+	DeleteUser(users.User) *errors.RestError
+	GetUserCollection(*gin.Context) (users.Users, *errors.RestError)
+	GetUserByStatus(bool) (users.Users, *errors.RestError)
+}
+
+func(userService *userService) CreateUser(user users.User) (*users.User, *errors.RestError) {
 	if err := user.Validate(); err != nil {
 		return nil, err
 	}
@@ -19,7 +36,7 @@ func CreateUser(user users.User) (*users.User, *errors.RestError) {
 	return &user, nil
 }
 
-func GetUser(userId int64) (*users.User, *errors.RestError) {
+func(userService *userService) GetUser(userId int64) (*users.User, *errors.RestError) {
 	result := &users.User{Id: userId}
 	if err := result.Get(); err != nil {
 		return nil, err
@@ -28,8 +45,8 @@ func GetUser(userId int64) (*users.User, *errors.RestError) {
 	return result, nil
 }
 
-func UpdateUser(user users.User) (*users.User, *errors.RestError) {
-	currentUser, errResult := GetUser(user.Id)
+func(userService *userService) UpdateUser(user users.User) (*users.User, *errors.RestError) {
+	currentUser, errResult := userService.GetUser(user.Id)
 	if errResult != nil {
 		return nil, errResult
 	}
@@ -50,8 +67,8 @@ func UpdateUser(user users.User) (*users.User, *errors.RestError) {
 	return currentUser, nil
 }
 
-func DeleteUser(user users.User) *errors.RestError {
-	currentUser, errResult := GetUser(user.Id)
+func(userService *userService) DeleteUser(user users.User) *errors.RestError {
+	currentUser, errResult := userService.GetUser(user.Id)
 	if errResult != nil {
 		return errResult
 	}
@@ -63,7 +80,7 @@ func DeleteUser(user users.User) *errors.RestError {
 	return nil
 }
 
-func GetUserCollection(c *gin.Context) (users.Users, *errors.RestError) {
+func(userService *userService) GetUserCollection(c *gin.Context) (users.Users, *errors.RestError) {
 	result := users.User{}
 	users, err := result.GetCollection()
 	if err != nil {
@@ -73,7 +90,7 @@ func GetUserCollection(c *gin.Context) (users.Users, *errors.RestError) {
 	return users, nil
 }
 
-func GetUserByStatus(status bool) (users.Users, *errors.RestError) {
+func(userService *userService) GetUserByStatus(status bool) (users.Users, *errors.RestError) {
 	users := &users.User{}
 	result, err := users.FibdByStatus(status)
 	if err != nil {

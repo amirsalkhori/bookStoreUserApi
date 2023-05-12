@@ -12,21 +12,12 @@ import (
 
 func CreateUser(c *gin.Context) {
 	var user users.User
-	// bytes, err := ioutil.ReadAll(c.Request.Body)
-	// if err != nil {
-	// 	//TODO: Handle error
-	// 	return
-	// }
-	// if err := json.Unmarshal(bytes, &user); err != nil {
-	// 	fmt.Println(err.Error())
-	// }
-
 	if err := c.ShouldBindJSON(&user); err != nil {
 		restError := errors.NewBadRequestError("Invalid json body")
 		c.JSON(int(restError.Status), restError)
 		return
 	}
-	result, errResult := services.CreateUser(user)
+	result, errResult := services.UserService.CreateUser(user)
 	if errResult != nil {
 		c.JSON(int(errResult.Status), errResult)
 		return
@@ -44,7 +35,7 @@ func GetUser(c *gin.Context) {
 		return
 	}
 
-	result, errResult := services.GetUser(userId)
+	result, errResult := services.UserService.GetUser(userId)
 	if errResult != nil {
 		c.JSON(int(errResult.Status), errResult)
 		return
@@ -68,7 +59,7 @@ func PutUser(c *gin.Context) {
 	}
 
 	user.Id = userId
-	result, err := services.UpdateUser(user)
+	result, err := services.UserService.UpdateUser(user)
 	if err != nil {
 		c.JSON(int(err.Status), err)
 		return
@@ -86,7 +77,7 @@ func DeleteUser(c *gin.Context) {
 	}
 	var user users.User
 	user.Id = userId
-	if err := services.DeleteUser(user); err != nil {
+	if err := services.UserService.DeleteUser(user); err != nil {
 		c.JSON(int(err.Status), err)
 		return
 	}
@@ -94,7 +85,7 @@ func DeleteUser(c *gin.Context) {
 }
 
 func GetUsers(c *gin.Context) {
-	users, errResult := services.GetUserCollection(c)
+	users, errResult := services.UserService.GetUserCollection(c)
 	if errResult != nil {
 		c.JSON(int(errResult.Status), errResult)
 		return
@@ -115,7 +106,7 @@ func Search(c *gin.Context) {
 		c.JSON(400, err)
 		return
 	}
-	users, errResult := services.GetUserByStatus(status)
+	users, errResult := services.UserService.GetUserByStatus(status)
 	if errResult != nil {
 		c.JSON(int(errResult.Status), errResult)
 		return
