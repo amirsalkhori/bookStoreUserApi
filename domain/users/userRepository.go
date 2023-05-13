@@ -3,6 +3,7 @@ package users
 import (
 	usersDB "bookStoreUser/dataSorces/mysql/usersDB"
 	"bookStoreUser/errors"
+	"bookStoreUser/logger"
 	"bookStoreUser/utils/dateUtils"
 	"fmt"
 	"strings"
@@ -28,10 +29,12 @@ func (user *User) Get() *errors.RestError {
 
 	db, err := usersDB.Connect()
 	if err != nil {
+		logger.Error("Error when tryin to connect to db", err)
 		return errors.NewInternamlServerError(err.Error())
 	}
 	err = db.Where("id = ?", user.Id).Find(&user).Error
 	if err != nil {
+		logger.Error("Error when tryin to get user", err)
 		return errors.NewInternamlServerError(err.Error())
 	}
 
@@ -61,6 +64,7 @@ func (user *User) Save() *errors.RestError {
 	// user.Id = userId
 	db, err := usersDB.Connect()
 	if err != nil {
+		logger.Error("Error when tryin to connect to db", err)
 		return errors.NewInternamlServerError(err.Error())
 	}
 	user.CreatedAt = dateUtils.GetNowString()
@@ -69,8 +73,10 @@ func (user *User) Save() *errors.RestError {
 	err = db.Create(&userItem).Error
 	if err != nil {
 		if strings.Contains(err.Error(), "email_UNIQUE") {
+			logger.Error("Error when tryin to save user, duplicate error", err)
 			return errors.NewBadRequestError(fmt.Sprintf("Email %s already exsist!", user.Email))
 		}
+		logger.Error("Error when tryin to save user", err)
 		return errors.NewInternamlServerError("Error durring the insert user")
 	}
 	user.Id = userItem.Id
@@ -81,11 +87,13 @@ func (user *User) Save() *errors.RestError {
 func (user *User) Update() *errors.RestError {
 	db, err := usersDB.Connect()
 	if err != nil {
+		logger.Error("Error when tryin to connect to db", err)
 		return errors.NewInternamlServerError(err.Error())
 	}
 	err = db.Save(&user).Error
 	if err != nil {
 		if strings.Contains(err.Error(), "email_UNIQUE") {
+			logger.Error("Error when tryin to update user, duplicate error", err)
 			return errors.NewBadRequestError(fmt.Sprintf("Email %s already exsist!", user.Email))
 		}
 	}
@@ -96,10 +104,12 @@ func (user *User) Update() *errors.RestError {
 func (user *User) Delete() *errors.RestError {
 	db, err := usersDB.Connect()
 	if err != nil {
+		logger.Error("Error when tryin to connect to db", err)
 		return errors.NewInternamlServerError(err.Error())
 	}
 	err = db.Delete(&user).Error
 	if err != nil {
+		logger.Error("Error when tryin to delete user", err)
 		return errors.NewInternamlServerError(err.Error())
 	}
 
@@ -110,6 +120,7 @@ func (user *User) GetCollection() ([]User, *errors.RestError) {
 	users := make([]User, 0)
 	db, err := usersDB.Connect()
 	if err != nil {
+		logger.Error("Error when tryin to connect to db", err)
 		return nil, errors.NewInternamlServerError(err.Error())
 	}
 	db.Find(&users) // SELECT * FROM users;
@@ -121,10 +132,12 @@ func (user User) FibdByStatus(status bool) ([]User, *errors.RestError) {
 	users := make([]User, 0)
 	db, err := usersDB.Connect()
 	if err != nil {
+		logger.Error("Error when tryin to connect to db", err)
 		return nil, errors.NewInternamlServerError(err.Error())
 	}
 	err = db.Where("status = ?", status).Find(&users).Error
 	if err != nil {
+		logger.Error("Error when tryin to get users", err)
 		return nil, errors.NewInternamlServerError(err.Error())
 	}
 	db.Where("status = ?", status).
