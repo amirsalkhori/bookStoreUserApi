@@ -7,6 +7,8 @@ import (
 	"bookStoreUser/utils/dateUtils"
 	"fmt"
 	"strings"
+
+	"gorm.io/gorm"
 )
 
 func (user *User) Get() *errors.RestError {
@@ -24,16 +26,25 @@ func (user *User) Get() *errors.RestError {
 	return nil
 }
 
-func (user *User) Save() *errors.RestError {
+func connection() (*gorm.DB, *errors.RestError) {
 	db, err := usersDB.Connect()
 	if err != nil {
 		logger.Error("Error when tryin to connect to db", err)
-		return errors.NewInternamlServerError(err.Error())
+		return nil, errors.NewInternamlServerError(err.Error())
+	}
+
+	return db, nil
+}
+
+func (user *User) Save() *errors.RestError {
+	db, errorConnection := connection()
+	if errorConnection != nil {
+		return errorConnection
 	}
 	user.CreatedAt = dateUtils.GetNowString()
 	userItem := User{Name: user.Name, Family: user.Family, Email: user.Email, Status: user.Status, Password: user.Password, CreatedAt: user.CreatedAt}
 
-	err = db.Create(&userItem).Error
+	err := db.Create(&userItem).Error
 	if err != nil {
 		if strings.Contains(err.Error(), "email_UNIQUE") {
 			logger.Error("Error when tryin to save user, duplicate error", err)
@@ -48,12 +59,11 @@ func (user *User) Save() *errors.RestError {
 }
 
 func (user *User) Update() *errors.RestError {
-	db, err := usersDB.Connect()
-	if err != nil {
-		logger.Error("Error when tryin to connect to db", err)
-		return errors.NewInternamlServerError(err.Error())
+	db, errorConnection := connection()
+	if errorConnection != nil {
+		return errorConnection
 	}
-	err = db.Save(&user).Error
+	err := db.Save(&user).Error
 	if err != nil {
 		if strings.Contains(err.Error(), "email_UNIQUE") {
 			logger.Error("Error when tryin to update user, duplicate error", err)
@@ -65,12 +75,11 @@ func (user *User) Update() *errors.RestError {
 }
 
 func (user *User) Delete() *errors.RestError {
-	db, err := usersDB.Connect()
-	if err != nil {
-		logger.Error("Error when tryin to connect to db", err)
-		return errors.NewInternamlServerError(err.Error())
+	db, errorConnection := connection()
+	if errorConnection != nil {
+		return errorConnection
 	}
-	err = db.Delete(&user).Error
+	err := db.Delete(&user).Error
 	if err != nil {
 		logger.Error("Error when tryin to delete user", err)
 		return errors.NewInternamlServerError(err.Error())
@@ -81,10 +90,9 @@ func (user *User) Delete() *errors.RestError {
 
 func (user *User) GetCollection() ([]User, *errors.RestError) {
 	users := make([]User, 0)
-	db, err := usersDB.Connect()
-	if err != nil {
-		logger.Error("Error when tryin to connect to db", err)
-		return nil, errors.NewInternamlServerError(err.Error())
+	db, errorConnection := connection()
+	if errorConnection != nil {
+		return nil, errorConnection
 	}
 	db.Find(&users) // SELECT * FROM users;
 
@@ -93,12 +101,11 @@ func (user *User) GetCollection() ([]User, *errors.RestError) {
 
 func (user User) FibdByStatus(status bool) ([]User, *errors.RestError) {
 	users := make([]User, 0)
-	db, err := usersDB.Connect()
-	if err != nil {
-		logger.Error("Error when tryin to connect to db", err)
-		return nil, errors.NewInternamlServerError(err.Error())
+	db, errorConnection := connection()
+	if errorConnection != nil {
+		return nil, errorConnection
 	}
-	err = db.Where("status = ?", status).Find(&users).Error
+	err := db.Where("status = ?", status).Find(&users).Error
 	if err != nil {
 		logger.Error("Error when tryin to get users", err)
 		return nil, errors.NewInternamlServerError(err.Error())
