@@ -15,6 +15,38 @@ services:
       - book_db_data:/var/lib/mysql
     ports:
       - "4306:3306"
+  elasticsearch:
+    platform: linux/amd64
+    image: elasticsearch:8.7.1
+    ports:
+      - 9200:9200
+    restart: always
+    volumes:
+      - elasticsearch-data:/usr/share/elasticsearch/data
+    environment:
+      - xpack.security.enabled=false
+      - discovery.type=single-node
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+  kibana:
+    platform: linux/amd64
+    image: docker.elastic.co/kibana/kibana:8.7.1
+    container_name: kibana
+    environment:
+      - "ELASTICSEARCH_URL=http://elasticsearch:9200"
+    ports:
+      - 5601:5601
+    volumes:
+      - kibana-data:/usr/share/kibana/data
+    depends_on:
+      - elasticsearch
+    restart: always
 
 volumes:
   book_db_data:
+  elasticsearch-data:
+    driver: local
+  kibana-data:
+    driver: local

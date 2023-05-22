@@ -5,6 +5,7 @@ import (
 	"bookStoreUser/errors"
 	"bookStoreUser/logger"
 	"bookStoreUser/utils/dateUtils"
+	"bookStoreUser/utils/elastic"
 	"fmt"
 	"strings"
 
@@ -54,6 +55,12 @@ func (user *User) Save() *errors.RestError {
 		return errors.NewInternamlServerError("Error durring the insert user")
 	}
 	user.Id = userItem.Id
+
+	elasticErr := elastic.Elastic.Insert(elastic.Elastic{}, "user_index", user)
+	if elasticErr != nil {
+		logger.Error("Error during index user into elastic", err)
+		return nil
+	}
 
 	return nil
 }
