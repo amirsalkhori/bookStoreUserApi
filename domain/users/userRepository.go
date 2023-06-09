@@ -117,8 +117,24 @@ func (user User) FibdByStatus(status bool) ([]User, *errors.RestError) {
 		logger.Error("Error when tryin to get users", err)
 		return nil, errors.NewInternamlServerError(err.Error())
 	}
-	db.Where("status = ?", status).
-		Find(&users) // SELECT * FROM users;
 
 	return users, nil
+}
+
+func (u *User) GetUserByEmailAndPassword() (*User, *errors.RestError) {
+	user := User{}
+	db, errorConnection := connection()
+	if errorConnection != nil {
+		return nil, errorConnection
+	}
+	err := db.Where("email = ? AND password = ? AND status = 1", u.Email, u.Password).Find(&user).Error
+	if err != nil {
+		logger.Error("Error when tryin to get users", err)
+		return nil, errors.NewInternamlServerError(err.Error())
+	}
+	if user.Id == 0 {
+		return nil, errors.NewNotFoundError("Invalid credential")
+	}
+
+	return &user, nil
 }
