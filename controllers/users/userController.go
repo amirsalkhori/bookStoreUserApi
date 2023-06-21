@@ -33,31 +33,6 @@ func CreateUser(c *gin.Context) {
 
 func GetUser(c *gin.Context) {
 
-	baseURL := "http://localhost:8080"
-	accessTokenID := "ali1"
-
-	client := http.Client{
-		Timeout: 100 * time.Millisecond,
-	}
-
-	url := fmt.Sprintf("%s/oauth/access_token/%s", baseURL, accessTokenID)
-	response, err := client.Get(url)
-	if err != nil {
-		fmt.Println("Error:", err)
-		return
-	}
-	defer response.Body.Close()
-
-	body, err := ioutil.ReadAll(response.Body)
-	if err != nil {
-		fmt.Println("Error reading response body:", err)
-		return
-	}
-
-	fmt.Println("Response is:", string(body))
-
-	return
-
 	if err := oauth.AuthenticateRequest(c.Request); err != nil {
 		c.JSON(int(err.Status), err)
 		return
