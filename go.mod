@@ -3,6 +3,7 @@ module bookStoreUser
 go 1.19
 
 require (
+	github.com/amirsalkhori/bookstroe_oauth_go v0.0.0-20230616105904-6754aa13dd4f // indirect
 	github.com/bytedance/sonic v1.8.6 // indirect
 	github.com/chenzhuoyu/base64x v0.0.0-20221115062448-fe3a3abad311 // indirect
 	github.com/gin-contrib/sse v0.1.0 // indirect
@@ -20,6 +21,7 @@ require (
 	github.com/leodido/go-urn v1.2.2 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect
 	github.com/mattn/go-isatty v0.0.18 // indirect
+	github.com/mercadolibre/golang-restclient v0.0.0-20170701022150-51958130a0a0 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/olivere/elastic/v7 v7.0.32 // indirect

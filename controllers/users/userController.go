@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/amirsalkhori/bookstroe_oauth_go/oauth"
 	"github.com/gin-gonic/gin"
 )
 
@@ -28,6 +29,10 @@ func CreateUser(c *gin.Context) {
 }
 
 func GetUser(c *gin.Context) {
+	if err := oauth.AuthenticateRequest(c.Request); err != nil {
+		c.JSON(int(err.Status), err)
+		return
+	}
 	userId, userErr := strconv.ParseInt(c.Param("id"), 10, 64)
 	if userErr != nil {
 		err := errors.NewBadRequestError("id should be a number !")
@@ -40,8 +45,13 @@ func GetUser(c *gin.Context) {
 		c.JSON(int(errResult.Status), errResult)
 		return
 	}
-	header := c.GetHeader("X-Public") == "true"
-	c.JSON(http.StatusAccepted, result.Marshall(header))
+
+	if oauth.GetCallerId(c.Request) == int(result.Id) {
+		c.JSON(http.StatusAccepted, result.Marshall(false))
+		return
+	}
+	// header := c.GetHeader("X-Public") == "true"
+	c.JSON(http.StatusAccepted, result.Marshall(oauth.IsPublic(c.Request)))
 }
 
 func PutUser(c *gin.Context) {

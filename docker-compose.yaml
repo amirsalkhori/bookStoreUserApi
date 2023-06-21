@@ -1,5 +1,4 @@
 version: "3.8"
-
 services:
   mysql:
     image: mysql
@@ -15,6 +14,8 @@ services:
       - book_db_data:/var/lib/mysql
     ports:
       - "4306:3306"
+    networks:
+      - my-network
   elasticsearch:
     platform: linux/amd64
     image: elasticsearch:8.7.1
@@ -30,6 +31,8 @@ services:
       memlock:
         soft: -1
         hard: -1
+    networks:
+      - my-network
   kibana:
     platform: linux/amd64
     image: docker.elastic.co/kibana/kibana:8.7.1
@@ -43,6 +46,8 @@ services:
     depends_on:
       - elasticsearch
     restart: always
+    networks:
+      - my-network
   rabbitmq:
     image: rabbitmq:management
     container_name: rabbitmq
@@ -52,10 +57,15 @@ services:
     ports:
       - "5672:5672"
       - "15672:15672"
+    networks:
+      - my-network
+
+networks:
+  my-network:
+    external:
+      name: my-network
 
 volumes:
   book_db_data:
-  elasticsearch-data:
-    driver: local
   kibana-data:
-    driver: local
+  elasticsearch-data:
