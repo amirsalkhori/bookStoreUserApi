@@ -4,11 +4,8 @@ import (
 	"bookStoreUser/domain/users"
 	"bookStoreUser/errors"
 	"bookStoreUser/services"
-	"fmt"
-	"io/ioutil"
 	"net/http"
 	"strconv"
-	"time"
 
 	"github.com/amirsalkhori/bookstroe_oauth_go/oauth"
 	"github.com/gin-gonic/gin"
@@ -53,9 +50,10 @@ func GetUser(c *gin.Context) {
 	if oauth.GetCallerId(c.Request) == int(result.Id) {
 		c.JSON(http.StatusAccepted, result.Marshall(false))
 		return
+	} else {
+		c.JSON(http.StatusUnauthorized, "Access denied.")
+		return
 	}
-	// header := c.GetHeader("X-Public") == "true"
-	c.JSON(http.StatusAccepted, result.Marshall(oauth.IsPublic(c.Request)))
 }
 
 func PutUser(c *gin.Context) {
